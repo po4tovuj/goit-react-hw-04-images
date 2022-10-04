@@ -23,8 +23,7 @@ export class App extends Component {
   };
   handleLeaveFeedback = e => {
     const { name } = e.currentTarget;
-    const currentState = this.state[name];
-    this.setState({ [name]: currentState + 1 });
+    this.setState(state => ({ [name]: state[name] + 1 }));
   };
   render() {
     return (

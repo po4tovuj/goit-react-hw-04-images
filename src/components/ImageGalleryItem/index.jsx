@@ -15,6 +15,7 @@ export const GalleryItem = ({ largeImageURL, url }) => {
           onClose={() => {
             console.log('should change status');
             setIsModalShow(false);
+            console.log('isModalShow', isModalShow);
           }}
           url={largeImageURL}
         />

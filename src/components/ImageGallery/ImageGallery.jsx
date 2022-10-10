@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 
-import { LoadMoreButton } from 'components/Button';
-import { GalleryItem } from 'components/ImageGalleryItem';
+import { LoadMoreButton } from 'components/Button/Button';
+import { GalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { List } from './ImageGallery.styled';
 
 export const Gallery = ({ images, loadMore, isLastPage, isLoading }) => {

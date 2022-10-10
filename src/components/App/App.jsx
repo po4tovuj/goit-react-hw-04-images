@@ -1,7 +1,7 @@
 import { Notify } from 'notiflix';
 import { getImages } from 'API/ImagesApi';
-import { Gallery } from 'components/ImageGallery';
-import { Header } from 'components/SearchBar';
+import { Gallery } from 'components/ImageGallery/ImageGallery';
+import { Header } from 'components/SearchBar/SearchBar';
 import { Component } from 'react';
 
 import { Container } from './App.styled';

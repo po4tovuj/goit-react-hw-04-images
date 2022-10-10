@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import { LoadMoreButton } from 'components/Button/Button';
 import { GalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { List } from './ImageGallery.styled';
-
+import Loader from 'components/Loader/Loader';
+import { css } from '@emotion/react';
 export const Gallery = ({ images, loadMore, isLastPage, isLoading }) => {
   return (
-    <div>
+    <>
       <List>
         {images.map(({ id, webformatURL, largeImageURL }) => {
           return (
@@ -18,10 +19,9 @@ export const Gallery = ({ images, loadMore, isLastPage, isLoading }) => {
           );
         })}
       </List>
-      {!isLastPage && (
-        <LoadMoreButton isLoading={isLoading} handleClick={loadMore} />
-      )}
-    </div>
+      {isLoading && <Loader />}
+      {!isLastPage && !isLoading && <LoadMoreButton handleClick={loadMore} />}
+    </>
   );
 };
 Gallery.propTypes = {
@@ -32,4 +32,5 @@ Gallery.propTypes = {
   ),
   loadMore: PropTypes.func,
   isLastPage: PropTypes.bool,
+  isLoading: PropTypes.bool,
 };

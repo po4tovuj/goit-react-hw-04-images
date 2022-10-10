@@ -50,11 +50,9 @@ export class App extends Component {
     this.setState({ ...images });
   };
   loadMore = async () => {
-    console.log('loading');
     this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
     const { page, searchQuery } = this.state;
-    console.log('searchQuery: ', searchQuery);
-    console.log('page: ', page);
+
     const response = await getImages({ query: searchQuery, page: page + 1 })
       .then(({ hits }) => {
         if (!hits.length) {
@@ -71,10 +69,13 @@ export class App extends Component {
         return { images: [], totalPages: 1, page: 1 };
       });
 
-    this.setState(({ images, ...rest }) => {
-      console.log('images: ', images);
-      console.log('response images: ', response.images);
-      return { images: images.concat(response.images), page: response.page };
+    this.setState(({ images, page, isLoading, totalPages }) => {
+      return {
+        images: images.concat(response.images),
+        page: response.page,
+        totalPages: response.totalPages || totalPages,
+        isLoading: !isLoading,
+      };
     });
   };
 

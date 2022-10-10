@@ -1,6 +1,5 @@
 import { Modal } from 'components/Modal';
 import PropTypes from 'prop-types';
-import { useCallback } from 'react';
 import { useState } from 'react';
 
 import { Image, ListItem } from './ImageGalleryItem.styled';

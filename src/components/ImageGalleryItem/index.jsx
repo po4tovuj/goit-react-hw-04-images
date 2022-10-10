@@ -8,19 +8,14 @@ export const GalleryItem = ({ largeImageURL, url }) => {
   const [isModalShow, setIsModalShow] = useState(false);
 
   return (
-    <ListItem onClick={() => setIsModalShow(true)}>
-      <Image src={url} alt="img" />
+    <>
+      <ListItem onClick={() => setIsModalShow(true)}>
+        <Image src={url} alt="img" />
+      </ListItem>
       {isModalShow && (
-        <Modal
-          onClose={() => {
-            console.log('should change status');
-            setIsModalShow(false);
-            console.log('isModalShow', isModalShow);
-          }}
-          url={largeImageURL}
-        />
+        <Modal onClose={() => setIsModalShow(false)} url={largeImageURL} />
       )}
-    </ListItem>
+    </>
   );
 };
 GalleryItem.propTypes = {

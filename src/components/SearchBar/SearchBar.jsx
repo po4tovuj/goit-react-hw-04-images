@@ -8,13 +8,13 @@ import {
   SearchBtnLabel,
   SearchForm,
 } from './SearchBar.styled';
-export const Header = ({ handleSearch }) => {
+export const Header = ({ onFilterChange }) => {
   return (
     <SearchBar>
       <Formik
         initialValues={{ searchQuery: '' }}
         onSubmit={values => {
-          handleSearch(values.searchQuery);
+          onFilterChange(values.searchQuery);
         }}
       >
         {({ values, handleSubmit, handleChange }) => (
@@ -38,5 +38,5 @@ export const Header = ({ handleSearch }) => {
   );
 };
 Header.propTypes = {
-  handleSearch: PropTypes.func,
+  onFilterChange: PropTypes.func,
 };

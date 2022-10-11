@@ -22,14 +22,25 @@ export class App extends Component {
   state = {
     ...INITIAL_STATE,
   };
-
-  handleSearch = async query => {
-    // there are no clear requirments about to should happen if we click submit button with same query, so lets do not search if the query is the same as it was.
-    if (query === this.state.searchQuery) {
-      return;
+  /** I dont understand why to do it in this way but its the only place and case i see were to use life cycle hooks for this task */
+  componentDidUpdate(prevProps, prevState) {
+    const { searchQuery, page, images } = this.state;
+    if (searchQuery !== prevState.searchQuery) {
+      this.doSearch(searchQuery);
     }
-    this.setState({ searchQuery: query });
+    if (page > 1 && images !== prevState.images) {
+      const { height: cardHeight } = document
+        .querySelector('#gallery-list')
+        .firstElementChild.getBoundingClientRect();
 
+      console.log('cardHeight: ', cardHeight);
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
+    }
+  }
+  doSearch = async query => {
     const images = await getImages({ query, page: 1 })
       .then(({ hits, totalHits }) => {
         if (!hits.length) {
@@ -49,34 +60,31 @@ export class App extends Component {
       });
     this.setState({ ...images });
   };
-  loadMore = async () => {
+  handleFilterQueryChange = query => {
+    this.setState({ searchQuery: query.trim().toLowerCase() });
+  };
+  loadMore = () => {
     this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
     const { page, searchQuery } = this.state;
 
-    const response = await getImages({ query: searchQuery, page: page + 1 })
+    getImages({ query: searchQuery, page: page + 1 })
       .then(({ hits }) => {
         if (!hits.length) {
           throw new Error(
             `Sorry, there are no images matching your search query. Please try again.`
           );
         }
-
-        return { images: hits, page: page + 1 };
+        this.setState(({ images, page, isLoading }) => ({
+          images: images.concat(hits),
+          page: page + 1,
+          isLoading: !isLoading,
+        }));
       })
       .catch(err => {
         const message = err.message;
         Notify.failure(message, options);
-        return { images: [], totalPages: 1, page: 1 };
+        this.setState({ images: [], isLoading: false });
       });
-
-    this.setState(({ images, page, isLoading, totalPages }) => {
-      return {
-        images: images.concat(response.images),
-        page: response.page,
-        totalPages: response.totalPages || totalPages,
-        isLoading: !isLoading,
-      };
-    });
   };
 
   render() {
@@ -84,7 +92,7 @@ export class App extends Component {
     const isLastPage = page === totalPages;
     return (
       <Container>
-        <Header handleSearch={this.handleSearch}></Header>
+        <Header onFilterChange={this.handleFilterQueryChange}></Header>
         <Gallery
           images={this.state.images}
           loadMore={this.loadMore}

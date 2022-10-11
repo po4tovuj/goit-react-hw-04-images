@@ -4,11 +4,10 @@ import { LoadMoreButton } from 'components/Button/Button';
 import { GalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { List } from './ImageGallery.styled';
 import Loader from 'components/Loader/Loader';
-import { css } from '@emotion/react';
 export const Gallery = ({ images, loadMore, isLastPage, isLoading }) => {
   return (
     <>
-      <List>
+      <List id="gallery-list">
         {images.map(({ id, webformatURL, largeImageURL }) => {
           return (
             <GalleryItem
@@ -18,9 +17,9 @@ export const Gallery = ({ images, loadMore, isLastPage, isLoading }) => {
             />
           );
         })}
+        {isLoading && <Loader />}
+        {!isLastPage && !isLoading && <LoadMoreButton handleClick={loadMore} />}
       </List>
-      {isLoading && <Loader />}
-      {!isLastPage && !isLoading && <LoadMoreButton handleClick={loadMore} />}
     </>
   );
 };

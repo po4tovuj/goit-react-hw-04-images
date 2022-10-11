@@ -30,15 +30,17 @@ export const App = () => {
   const [isLastPage, setIsLastPage] = useState(true);
   useEffect(() => {
     setIsLastPage(page === totalPage);
-    const { height: cardHeight } = document
-      .querySelector('#gallery-list')
-      .firstElementChild.getBoundingClientRect();
+    if (page > 1) {
+      const { height: cardHeight } = document
+        .querySelector('#gallery-list')
+        .firstElementChild.getBoundingClientRect();
 
-    console.log('cardHeight: ', cardHeight);
-    window.scrollBy({
-      top: cardHeight,
-      behavior: 'smooth',
-    });
+      console.log('cardHeight: ', cardHeight);
+      window.scrollBy({
+        top: cardHeight,
+        behavior: 'smooth',
+      });
+    }
   }, [page, totalPage]);
   const handleFilterQueryChange = query => {
     setSearchQuery(query);

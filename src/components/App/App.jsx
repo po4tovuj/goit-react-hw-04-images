@@ -46,13 +46,7 @@ export const App = () => {
     setSearchQuery(query);
     doSearch(query);
   };
-  // useEffect(() => {
-  //   if (initialRender.current) {
-  //     initialRender.current = false;
-  //   } else {
-  //     doSearch();
-  //   }
-  // }, [searchQuery]);
+
   const doSearch = query => {
     getImages({ query, page: 1 })
       .then(({ hits, totalHits }) => {

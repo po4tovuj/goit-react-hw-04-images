@@ -5,6 +5,8 @@ import { Header } from 'components/SearchBar/SearchBar';
 import { Component } from 'react';
 
 import { Container } from './App.styled';
+import { useState } from 'react';
+import { useEffect } from 'react';
 const INITIAL_STATE = {
   images: [],
   searchQuery: '',
@@ -18,7 +20,75 @@ const options = {
   width: 'fit-content',
 };
 
-export class App extends Component {
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+
+  const [totalPage, setTotalPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLastPage, setIsLastPage] = useState(true);
+  useEffect(() => {
+    doSearch(searchQuery);
+  }, [searchQuery]);
+  useEffect(() => {
+    setIsLastPage(page === totalPage);
+  }, [page, totalPage]);
+
+  const doSearch = query => {
+    getImages({ query, page: 1 })
+      .then(({ hits, totalHits }) => {
+        if (!hits.length) {
+          throw new Error(
+            `Sorry, there are no images matching your search query. Please try again.`
+          );
+        }
+        setTotalPage(Math.ceil(totalHits / 20));
+        setImages(hits);
+        setPage(1);
+        Notify.success(`Hooray! We found ${totalHits} images.`, options);
+      })
+      .catch(err => {
+        const message = err.message;
+        Notify.failure(message, options);
+        setImages([]);
+        setTotalPage(1);
+        setPage(1);
+      });
+  };
+  const loadMore = () => {
+    setIsLoading(true);
+
+    getImages({ query: searchQuery, page: page + 1 })
+      .then(({ hits }) => {
+        if (!hits.length) {
+          throw new Error(
+            `Sorry, there are no images matching your search query. Please try again.`
+          );
+        }
+        setImages(state => state.images.concat(hits));
+        setPage(state => state.page + 1);
+        setIsLoading(false);
+      })
+      .catch(err => {
+        const message = err.message;
+        Notify.failure(message, options);
+        setIsLoading(false);
+      });
+  };
+  return (
+    <Container>
+      <Header onFilterChange={query => setSearchQuery(query)}></Header>
+      <Gallery
+        images={images}
+        loadMore={loadMore}
+        isLastPage={isLastPage}
+        isLoading={isLoading}
+      ></Gallery>
+    </Container>
+  );
+};
+export class OldApp extends Component {
   state = {
     ...INITIAL_STATE,
   };

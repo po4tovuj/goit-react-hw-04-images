@@ -14,7 +14,7 @@ export const Header = ({ onFilterChange }) => {
       <Formik
         initialValues={{ searchQuery: '' }}
         onSubmit={values => {
-          onFilterChange(values.searchQuery);
+          onFilterChange(values.searchQuery.trim().toLowerCase());
         }}
       >
         {({ values, handleSubmit, handleChange }) => (

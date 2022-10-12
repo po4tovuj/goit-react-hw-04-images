@@ -6,6 +6,8 @@ import { Header } from 'components/SearchBar/SearchBar';
 
 import { Container } from './App.styled';
 import { useState, useEffect } from 'react';
+import Loader from 'components/Loader/Loader';
+import { LoadMoreButton } from 'components/LoadMoreButton/LoadMoreButton';
 // import {  } from 'react';
 // const INITIAL_STATE = {
 //   images: [],
@@ -18,85 +20,82 @@ const options = {
   position: 'left-top',
   fontSize: '20px',
   width: 'fit-content',
+  timeout: 1500,
+  showOnlyTheLastOne: true,
 };
 
 export const App = () => {
-  const [images, setImages] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
 
   const [totalPage, setTotalPage] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
   const [isLastPage, setIsLastPage] = useState(true);
+
+  const [isLoading, setIsLoading] = useState(false);
   useEffect(() => {
-    setIsLastPage(page === totalPage);
+    console.log('called!');
     if (page > 1) {
       const { height: cardHeight } = document
         .querySelector('#gallery-list')
         .firstElementChild.getBoundingClientRect();
-
-      console.log('cardHeight: ', cardHeight);
       window.scrollBy({
         top: cardHeight,
+        behavior: 'smooth',
+      });
+    } else {
+      window.scroll({
+        top: 0,
         behavior: 'smooth',
       });
     }
   }, [page, totalPage]);
   const handleFilterQueryChange = query => {
     setSearchQuery(query);
-    doSearch(query);
+    setPage(1);
+    doSearch({ query, page: 1 });
   };
 
-  const doSearch = query => {
-    getImages({ query, page: 1 })
+  const doSearch = ({ query = searchQuery, page = 1 }) => {
+    setIsLoading(true);
+
+    getImages({ query, page })
       .then(({ hits, totalHits }) => {
         if (!hits.length) {
           throw new Error(
             `Sorry, there are no images matching your search query. Please try again.`
           );
         }
-        setTotalPage(Math.ceil(totalHits / 20));
-        setImages(hits);
-        setPage(1);
+        const totalPages = Math.ceil(totalHits / 20);
+        setImages(state => (page === 1 ? hits : state.concat(hits)));
+        setPage(page);
+        setTotalPage(totalPages);
+        setIsLastPage(page === totalPages);
+        setIsLoading(false);
+
         Notify.success(`Hooray! We found ${totalHits} images.`, options);
       })
       .catch(err => {
         const message = err.message;
         Notify.failure(message, options);
-        setImages([]);
-        setTotalPage(1);
-        setPage(1);
-      });
-  };
-  const loadMore = () => {
-    setIsLoading(true);
-
-    getImages({ query: searchQuery, page: page + 1 })
-      .then(({ hits }) => {
-        if (!hits.length) {
-          throw new Error(
-            `Sorry, there are no images matching your search query. Please try again.`
-          );
+        if (page === 1) {
+          setImages([]);
+          setTotalPage(1);
+          setIsLastPage(true);
         }
-        setImages(state => state.concat(hits));
-        setPage(state => state + 1);
-        setIsLoading(false);
-      })
-      .catch(err => {
-        const message = err.message;
-        Notify.failure(message, options);
         setIsLoading(false);
       });
   };
+
   return (
     <Container>
       <Header onFilterChange={query => handleFilterQueryChange(query)}></Header>
-      <Gallery
-        images={images}
-        loadMore={loadMore}
-        isLastPage={isLastPage}
-        isLoading={isLoading}
-      ></Gallery>
+      <Gallery images={images}></Gallery>
+      {isLoading && page !== 1 && <Loader />}
+      {!isLastPage && !isLoading && (
+        <LoadMoreButton handleClick={() => doSearch({ page: page + 1 })} />
+      )}
     </Container>
   );
 };
@@ -115,7 +114,7 @@ export const App = () => {
 //         .querySelector('#gallery-list')
 //         .firstElementChild.getBoundingClientRect();
 
-//       console.log('cardHeight: ', cardHeight);
+//
 //       window.scrollBy({
 //         top: cardHeight * 2,
 //         behavior: 'smooth',

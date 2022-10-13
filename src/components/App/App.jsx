@@ -28,65 +28,70 @@ export const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const [images, setImages] = useState([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
 
-  const [totalPage, setTotalPage] = useState(1);
   const [isLastPage, setIsLastPage] = useState(true);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleFilterQueryChange = query => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
   useEffect(() => {
-    console.log('called!');
+    const doSearch = () => {
+      setIsLoading(true);
+      console.log('searchQuery: ', searchQuery);
+
+      return getImages({ query: searchQuery, page })
+        .then(({ hits, totalHits }) => {
+          if (!hits.length) {
+            throw new Error(
+              `Sorry, there are no images matching your search query. Please try again.`
+            );
+          }
+
+          const totalPages = Math.ceil(totalHits / 20);
+          setIsLastPage(page === totalPages);
+          setIsLoading(false);
+          setImages(state => (page === 1 ? hits : state.concat(hits)));
+
+          Notify.success(`Hooray! We found ${totalHits} images.`, options);
+        })
+        .then(() => {})
+        .catch(err => {
+          const message = err.message;
+          Notify.failure(message, options);
+          if (page === 1) {
+            setImages([]);
+            setIsLastPage(true);
+          }
+          setIsLoading(false);
+        });
+    };
     if (page > 1) {
-      const { height: cardHeight } = document
-        .querySelector('#gallery-list')
-        .firstElementChild.getBoundingClientRect();
-      window.scrollBy({
-        top: cardHeight,
-        behavior: 'smooth',
-      });
-    } else {
+      // doSearch()
+      //   const { height: cardHeight } = document
+      //     .querySelector('#gallery-list')
+      //     .firstElementChild.getBoundingClientRect();
+      //   const wrap = document.querySelector('body');
+      //   console.log('cardHeight: ', cardHeight);
+      //   console.log('document.querySelector ', document.querySelector('body'));
+      //   wrap.scrollBy({
+      //     top: cardHeight * 2,
+      //     behavior: 'smooth',
+      //   });
+
+      console.log('should scroll');
+    } else if (page === 1) {
+      doSearch();
       window.scroll({
         top: 0,
         behavior: 'smooth',
       });
     }
-  }, [page, totalPage]);
-  const handleFilterQueryChange = query => {
-    setSearchQuery(query);
-    setPage(1);
-    doSearch({ query, page: 1 });
-  };
-
-  const doSearch = ({ query = searchQuery, page = 1 }) => {
-    setIsLoading(true);
-
-    getImages({ query, page })
-      .then(({ hits, totalHits }) => {
-        if (!hits.length) {
-          throw new Error(
-            `Sorry, there are no images matching your search query. Please try again.`
-          );
-        }
-        const totalPages = Math.ceil(totalHits / 20);
-        setImages(state => (page === 1 ? hits : state.concat(hits)));
-        setPage(page);
-        setTotalPage(totalPages);
-        setIsLastPage(page === totalPages);
-        setIsLoading(false);
-
-        Notify.success(`Hooray! We found ${totalHits} images.`, options);
-      })
-      .catch(err => {
-        const message = err.message;
-        Notify.failure(message, options);
-        if (page === 1) {
-          setImages([]);
-          setTotalPage(1);
-          setIsLastPage(true);
-        }
-        setIsLoading(false);
-      });
-  };
+  }, [page, searchQuery]);
 
   return (
     <Container>
@@ -94,7 +99,7 @@ export const App = () => {
       <Gallery images={images}></Gallery>
       {isLoading && page !== 1 && <Loader />}
       {!isLastPage && !isLoading && (
-        <LoadMoreButton handleClick={() => doSearch({ page: page + 1 })} />
+        <LoadMoreButton handleClick={() => setPage(page + 1)} />
       )}
     </Container>
   );

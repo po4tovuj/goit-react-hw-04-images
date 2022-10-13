@@ -71,17 +71,15 @@ export const App = () => {
         });
     };
     if (page > 1) {
-      // doSearch()
-      //   const { height: cardHeight } = document
-      //     .querySelector('#gallery-list')
-      //     .firstElementChild.getBoundingClientRect();
-      //   const wrap = document.querySelector('body');
-      //   console.log('cardHeight: ', cardHeight);
-      //   console.log('document.querySelector ', document.querySelector('body'));
-      //   wrap.scrollBy({
-      //     top: cardHeight * 2,
-      //     behavior: 'smooth',
-      //   });
+      doSearch();
+      const { height: cardHeight } = document
+        .querySelector('#gallery-list')
+        .firstElementChild.getBoundingClientRect();
+      console.log('cardHeight: ', cardHeight);
+      window.scrollBy({
+        top: cardHeight * 2,
+        behavior: 'smooth',
+      });
 
       console.log('should scroll');
     } else if (page === 1) {
